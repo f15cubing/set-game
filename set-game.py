@@ -26,7 +26,7 @@ class SetCardGame:
                                    bg="#2c3e50", fg="white", font=("Arial", 16))
         self.sets_label.pack(side=tk.LEFT, padx=10)
 
-        self.deck_label = tk.Label(self.info_frame, text=f"Deck: {len(self.deck)}",
+        self.deck_label = tk.Label(self.info_frame, text=f"Cards left: {len(self.deck)}",
                                    bg="#2c3e50", fg="white", font=("Arial", 16))
         self.deck_label.pack(side=tk.RIGHT, padx=10)
 
@@ -47,6 +47,9 @@ class SetCardGame:
         return deck
 
     def draw_table(self):
+        """
+        Draw cards on table.
+        """
         for widget in self.frame.winfo_children():
             widget.destroy()
 
@@ -63,6 +66,10 @@ class SetCardGame:
             self.draw_card(canvas, card)
 
     def select_card(self, idx):
+        """
+        Allow user to select a card by clicking on it.
+        Whenever 3 cards are selected, check if they are a set and unselect them.
+        """
         if idx in self.selected:
             self.selected.remove(idx)
         else:
@@ -87,11 +94,17 @@ class SetCardGame:
             self.update_highlight()
 
     def update_highlight(self):
+        """
+        Update which cards are highlighted.
+        """
         for i, canvas in enumerate(self.frame.winfo_children()):
             if i < len(self.table):
                 canvas.configure(highlightbackground="#f1c40f" if i in self.selected else "#bdc3c7")
 
     def replace_cards(self, indices):
+        """
+        Replace given cards on table (when a set is found).
+        """
         indices.sort(reverse=True)
         for idx in indices:
             if self.deck:
@@ -103,14 +116,21 @@ class SetCardGame:
         self.draw_table()
 
     def remove_selected_cards(self, indices):
+        """
+        Remove given cards from table.
+        """
         indices.sort(reverse=True)
         for idx in indices:
             del self.table[idx]
         self.draw_table()
 
     def is_set(self, c1, c2, c3):
+        """
+        Check if 3 given cards form a set.
+        """
         for i in range(4):
             vals = {c1[i], c2[i], c3[i]}
+            # Check how many distinct values we have; we need 1 or 3.
             if len(vals) == 2:
                 return False
         return True
@@ -139,22 +159,21 @@ class SetCardGame:
 
     def draw_diamond(self, canvas, x, y, w, h, color, shading):
         """
-        Draw diamons centered at (x,y), woth given color and shading.
+        Draw diamond centered at (x,y), woth given color and shading.
         """
         pts = [x, y-h, x+w, y, x, y+h, x-w, y]
 
-        if shading == 0:  # Solid
+        if shading == 0:  # solid
             canvas.create_polygon(pts, fill=color, outline=color, width=2)
-        elif shading == 1:  # Striped
+        elif shading == 1:  # striped
             canvas.create_polygon(pts, fill='', outline=color, width=2)  # outline first
-            # Draw stripes inside the diamond
             step = 3
             for i in range(-w, w+1, step):
                 # compute y-range at this x
                 y_top = y - h * (1 - abs(i)/w)
                 y_bottom = y + h * (1 - abs(i)/w)
                 canvas.create_line(x+i, y_top, x+i, y_bottom, fill=color)
-        else:  # Empty
+        else:  # empty
             canvas.create_polygon(pts, fill='', outline=color, width=2)
 
 
@@ -197,7 +216,6 @@ class SetCardGame:
         if shading == 0: # solid
             canvas.create_polygon(points, fill=color, outline=color, width=2, smooth=True)
         elif shading == 1: # striped
-            # draw stripes using exact polygon clipping by scanline intersections
             self.draw_striped_polygon(canvas, points, color, step=4)
             canvas.create_polygon(points, fill='', outline=color, width=2, smooth=True)
         else: # empty
@@ -205,7 +223,7 @@ class SetCardGame:
 
     def draw_striped_polygon(self, canvas, points, color, step=4):
         """
-        Draw horizontal stripes *only inside* the polygon.
+        Draw horizontal stripes inside the polygon.
         - points: flat list [x0,y0,x1,y1,...] (polygon should be closed or implicitly closed)
         - color: stripe color
         - step: vertical spacing between stripes in pixels
