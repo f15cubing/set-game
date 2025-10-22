@@ -38,6 +38,9 @@ class SetCardGame:
         self.draw_table()
 
     def create_deck(self):
+        """
+        Create a shuffled 81 card deck.
+        """
         deck = [(shape, color, shade, number) for shape in range(3) for color in range(3)
                 for shade in range(3) for number in range(3)]
         random.shuffle(deck)
@@ -113,6 +116,9 @@ class SetCardGame:
         return True
 
     def draw_card(self, canvas, card):
+        """
+        Render card into interface
+        """
         shape, color_idx, shading, number = card
         color = self.colors[color_idx]
         count = number + 1
@@ -132,7 +138,9 @@ class SetCardGame:
                 self.draw_squiggle(canvas, 55, y, 50, 18, color, shading)
 
     def draw_diamond(self, canvas, x, y, w, h, color, shading):
-        # Diamond points
+        """
+        Draw diamons centered at (x,y), woth given color and shading.
+        """
         pts = [x, y-h, x+w, y, x, y+h, x-w, y]
 
         if shading == 0:  # Solid
@@ -151,6 +159,9 @@ class SetCardGame:
 
 
     def draw_oval(self, canvas, x, y, w, h, color, shading):
+        """
+        Draw oval centered at (x,y), with given color and shading.
+        """
         if shading == 0:  # solid
             canvas.create_oval(x-w, y-h, x+w, y+h, fill=color, outline=color, width=2)
         elif shading == 1:  # striped
@@ -167,8 +178,7 @@ class SetCardGame:
 
     def draw_squiggle(self, canvas, x, y, w, h, color, shading):
         """
-        Draw squiggle centered at (x,y). Keep the same point shape you used,
-        but use scanline clipping for stripes so shading never bleeds out.
+        Draw squiggle centered at (x,y).
         """
         points = [
             x, y - h*0.3,
@@ -184,13 +194,13 @@ class SetCardGame:
             x - w*0.8, y - h*0.2,
             x - w*0.3, y,
         ]
-        if shading == 0:
+        if shading == 0: # solid
             canvas.create_polygon(points, fill=color, outline=color, width=2, smooth=True)
-        elif shading == 1:
+        elif shading == 1: # striped
             # draw stripes using exact polygon clipping by scanline intersections
             self.draw_striped_polygon(canvas, points, color, step=4)
             canvas.create_polygon(points, fill='', outline=color, width=2, smooth=True)
-        else:
+        else: # empty
             canvas.create_polygon(points, fill='', outline=color, width=2, smooth=True)
 
     def draw_striped_polygon(self, canvas, points, color, step=4):
