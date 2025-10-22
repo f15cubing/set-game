@@ -1,40 +1,44 @@
-# set-game
 # SET — The Card Game (Python)
 
-A graphical implementation of the classic **SET** card game built in **Python** using `tkinter`.
+A graphical implementation of the classic **SET** card game, built with **Python** and **Tkinter**, organized into modular files for clarity and extensibility.
 
 ---
 
 ## Features
 
-- Full 81-card deck (3 shapes × 3 colors × 3 fills × 3 numbers)
-- Click to select cards — automatically checks if a set is formed
-- Cards that form a SET are replaced (or removed if more than 12)
-- Centered 3×n grid layout
+- **81-card deck** — 3 shapes × 3 colors × 3 shadings × 3 numbers
+- **Interactive gameplay** — click to select cards, automatically checks for valid sets
+- **Dynamic layout** — adapts to any number of cards with a centered 3×n grid
+- **Smart replacement logic** — replaces cards when ≤12 on the table, removes them otherwise
+- **New deck button** — start a fresh game while keeping previously found sets
+- Tracks the number of sets found and cards remaining in the deck
 
 ---
 
 ## How to Play
 
 Each card has **four attributes**:
-- **Shape:** oval, diamond, or squiggle
-- **Color:** red, green, or purple
-- **Shading:** solid, striped, or empty
-- **Number:** one, two, or three symbols
 
-A **SET** consists of 3 cards where, for *each attribute*,
-the values are either **all the same** or **all different**.
+| Attribute | Options |
+|------------|----------|
+| Shape | Oval, Diamond, Squiggle |
+| Color | Red, Green, Purple |
+| Shading | Solid, Striped, Empty |
+| Number | One, Two, or Three symbols |
 
-Click any three cards — if they form a valid set, they are removed and replaced.
+A **SET** consists of **3 cards** where, for *each attribute*, the values are either **all the same** or **all different**.
+
+Click three cards — if they form a valid SET, they disappear (and new ones are dealt).
 
 ---
 
 ## How to Run
 
 ### Requirements
-- Python 3.9+
-- Tkinter (included with most Python installations)
+- **Python 3.9+**
+- **Tkinter**
 
 ### Run the game
+
 ```bash
-python set_game.py
+python main.py
