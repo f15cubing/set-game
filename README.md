@@ -29,7 +29,7 @@ Click any three cards — if they form a valid set, they are removed and replace
 
 ---
 
-## 🚀 How to Run
+## How to Run
 
 ### Requirements
 - Python 3.9+
