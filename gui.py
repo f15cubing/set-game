@@ -1,7 +1,8 @@
 import tkinter as tk
-from game_logic import create_deck, is_set
+from game_logic import create_deck, is_set, exists_set
 from shapes import draw_card
 import time
+from tkinter import messagebox
 
 class SetCardGame:
     def __init__(self, root):
@@ -66,6 +67,11 @@ class SetCardGame:
                                         command=self.end_timed_run, state=tk.DISABLED)
         self.end_run_button.pack(side=tk.RIGHT, padx=10)
 
+        # Timer
+        self.timer_label = tk.Label(self.info_frame, text="Time: 00:00.00",
+                                    bg="#2c3e50", fg="white", font=("Arial", 16))
+        self.timer_label.pack(side=tk.LEFT, padx=10)
+
         self.draw_table()
 
     def draw_table(self):
@@ -103,6 +109,12 @@ class SetCardGame:
                     self.replace_cards(self.selected)
                 else:
                     self.remove_selected_cards(self.selected)
+
+                if self.timed_run_active and not exists_set(self.table) and not self.deck:
+                    # Stop automatically (Deck is finished and no more sets remain)
+                    # pass manual=False to indicate automatic completion
+                    self.end_timed_run(manual=False)
+
             self.selected.clear()
             self.update_highlight()
 
@@ -144,9 +156,78 @@ class SetCardGame:
         self.draw_table()
 
     def start_timed_run(self):
-        pass
-        #self.new_deck()
-        #start_time = time.time()
+        """Start a timed run: disable New Deck, enable End Run, start timer."""
+        if self.timed_run_active:
+            return
 
-    def end_timed_run(self):
-        pass
+        # Set data for beginning of run
+        self.collected_sets = []
+        self.sets_label.config(text=f"Sets Found: {len(self.collected_sets)}")
+        self.timed_run_active = True
+        self.run_start_time = time.perf_counter()
+        self.run_elapsed = 0.0
+
+        # UI updates
+        self.new_deck_button.config(state=tk.DISABLED)   # disable New Deck during run
+        self.start_run_button.config(state=tk.DISABLED)
+        self.end_run_button.config(state=tk.NORMAL)
+
+        # Start timer loop
+        if self.timer_update_job:
+            self.root.after_cancel(self.timer_update_job)
+            self.timer_update_job = None
+        self.update_timer()
+
+    def end_timed_run(self, manual = True):
+        """
+        End the timed run. If manual=True, user clicked End Run;
+        otherwise it's automatic (deck finished).
+        """
+        if not self.timed_run_active:
+            return
+
+        self.timed_run_active = False
+
+        # cancel scheduled update if any
+        if self.timer_update_job:
+            self.root.after_cancel(self.timer_update_job)
+            self.timer_update_job = None
+
+        # final elapsed
+        final_elapsed = time.perf_counter() - self.run_start_time
+        final_time_str = self.format_time(final_elapsed)
+
+        # re-enable UI
+        self.new_deck_button.config(state=tk.NORMAL)
+        self.start_run_button.config(state=tk.NORMAL)
+        self.end_run_button.config(state=tk.DISABLED)
+
+        # Show final score & time in a dialog
+        sets_found = len(self.collected_sets)
+        if manual:
+            title = "Timed Run Ended"
+        else:
+            title = "Timed Run Complete"
+
+        tk.messagebox.showinfo(title, f"Run finished!\n\nSets found: {sets_found}\nTime: {final_time_str}")
+
+        # update timer label to final time
+        self.timer_label.config(text=f"Time: {final_time_str}")
+
+    def format_time(self, seconds):
+        """Return MM:SS.ss string."""
+        mins = int(seconds // 60)
+        secs = seconds - mins * 60
+        return f"{mins:02d}:{secs:05.2f}"
+
+    def update_timer(self):
+        """Update timer label; scheduled using after while run active."""
+        if not self.timed_run_active:
+            return
+
+        now = time.perf_counter()
+        self.run_elapsed = now - self.run_start_time
+        self.timer_label.config(text=f"Time: {self.format_time(self.run_elapsed)}")
+
+        # schedule next update (50 ms)
+        self.timer_update_job = self.root.after(50, self.update_timer)
