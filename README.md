@@ -12,6 +12,7 @@ A graphical implementation of the classic **SET** card game, built with **Python
 - **Smart replacement logic** — replaces cards when ≤12 on the table, removes them otherwise
 - **New deck button** — start a fresh game while keeping previously found sets
 - Tracks the number of sets found and cards remaining in the deck
+- **Timed runs** — see how long it takes you to finish a complete deck
 
 ---
 
