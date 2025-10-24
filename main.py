@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 from gui import SetCardGame
 
 if __name__ == "__main__":
