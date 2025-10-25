@@ -4,6 +4,7 @@
 # is_set_1 is marginally faster, averaging 0.022 seconds over all possible combinations of 3 cards
 # is_set_2 averaged 0.030 seconds over all combinations
 
+import math
 import time
 import random
 from itertools import combinations
@@ -41,9 +42,28 @@ def is_set_2(c1, c2, c3):
             return False
     return True
 
-
+"""
 times = []
 for i in range(1000):
     new_time = test_speed()
     times.append(new_time)
 print(sum(times) / len(times))
+"""
+
+def calculate_score(raw_score):
+    time = raw_score["time"]
+    sets_found = raw_score["sets"]
+    penalty = raw_score["penalty"]
+
+    if sets_found < 21: #
+        sets_found = 0
+    elif sets_found > 23:
+        sets_found = sets_found**2
+
+    score = sets_found**0.55 * (1000 / time) - 5*penalty
+    return score
+
+raw_score = {"sets" : 24, "time" : 60, "penalty": 0}
+for i in range(28):
+    raw_score["sets"] = i
+    print(f"{calculate_score(raw_score):.4}")
