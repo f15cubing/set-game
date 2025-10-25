@@ -243,7 +243,9 @@ class SetCardGame:
         # update timer and socre label to final time
         self.timer_label.config(text=f"Time: {final_time_str}")
         self.score_label.config(text=f"Score: {self.score}")
-
+        print(self.score)
+        print(final_time_str)
+        print(self.raw_score["penalty"])
 
         for x in self.raw_score:
             self.raw_score[x] = 0
