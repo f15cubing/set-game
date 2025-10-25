@@ -1,5 +1,5 @@
 import tkinter as tk
-from game_logic import create_deck, is_set, exists_set
+from game_logic import create_deck, is_set, exists_set, calculate_score
 from shapes import draw_card
 import time
 from tkinter import messagebox
@@ -24,6 +24,8 @@ class SetCardGame:
         self.run_start_time = 0.0
         self.run_elapsed = 0.0
         self.timer_update_job = None
+        self.score = 0
+        self.raw_score = {"sets" : 0, "time" : 0, "penalty": 0}
 
 
         # Layout setup
@@ -32,6 +34,17 @@ class SetCardGame:
 
         self.info_frame = tk.Frame(root, bg="#2c3e50")
         self.info_frame.pack(fill=tk.X, padx=20, pady=(0, 20))
+
+        # Score label
+        self.score_label = tk.Label(
+            self.root,
+            text=f"Score: {self.score}",
+            font=("Arial", 16),
+            bg="#47bbc1",
+            fg="white"
+        )
+        self.score_label.place(x=20, y=10)
+
 
         # How many sets have been found label
         self.sets_label = tk.Label(self.info_frame, text="Sets Found: 0",
@@ -105,6 +118,9 @@ class SetCardGame:
                 self.collected_sets.append(tuple(sorted([c1, c2, c3])))
                 self.sets_label.config(text=f"Sets Found: {len(self.collected_sets)}")
 
+                if self.timed_run_active:
+                    self.raw_score["sets"] += 1
+
                 if len(self.table) <= 12:
                     self.replace_cards(self.selected)
                 else:
@@ -139,9 +155,15 @@ class SetCardGame:
         self.draw_table()
 
     def add_three_cards(self):
+        """Add 3 cards to the table"""
         if not self.deck:
             tk.messagebox.showwarning("No more cards", "The deck is empty!")
             return
+
+        # Check how 'efficient' adding new cards was
+        if self.timed_run_active:
+            self.raw_score["penalty"] += exists_set(self.table)
+
         for _ in range(3):
             if self.deck:
                 self.table.append(self.deck.pop())
@@ -166,11 +188,14 @@ class SetCardGame:
         self.timed_run_active = True
         self.run_start_time = time.perf_counter()
         self.run_elapsed = 0.0
+        self.score = 0
+
 
         # UI updates
         self.new_deck_button.config(state=tk.DISABLED)   # disable New Deck during run
         self.start_run_button.config(state=tk.DISABLED)
         self.end_run_button.config(state=tk.NORMAL)
+        self.new_deck() # Ensure a new deck is drawn for the timed run
 
         # Start timer loop
         if self.timer_update_job:
@@ -195,7 +220,9 @@ class SetCardGame:
 
         # final elapsed
         final_elapsed = time.perf_counter() - self.run_start_time
+        self.raw_score["time"] = final_elapsed
         final_time_str = self.format_time(final_elapsed)
+
 
         # re-enable UI
         self.new_deck_button.config(state=tk.NORMAL)
@@ -209,10 +236,17 @@ class SetCardGame:
         else:
             title = "Timed Run Complete"
 
-        tk.messagebox.showinfo(title, f"Run finished!\n\nSets found: {sets_found}\nTime: {final_time_str}")
+        self.score = calculate_score(self.raw_score)
 
-        # update timer label to final time
+        tk.messagebox.showinfo(title, f"Run finished!\n\nSets found: {sets_found}\nTime: {final_time_str}\nScore: {self.score}")
+
+        # update timer and socre label to final time
         self.timer_label.config(text=f"Time: {final_time_str}")
+        self.score_label.config(text=f"Score: {self.score}")
+
+
+        for x in self.raw_score:
+            self.raw_score[x] = 0
 
     def format_time(self, seconds):
         """Return MM:SS.ss string."""

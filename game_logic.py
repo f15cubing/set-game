@@ -20,7 +20,11 @@ def is_set(c1, c2, c3):
 
 def exists_set(table):
     """Check if a set exists in a given collection of cards"""
+    count = 0
     for c1,c2,c3 in combinations(table, 3):
         if is_set(c1,c2,c3):
-            return True
-    return False
+            count += 1
+    return count
+
+def calculate_score(raw_score):
+    pass
