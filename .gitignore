@@ -1,3 +1,35 @@
+# Python cache and compiled files
 __pycache__/
 *.pyc
-leaderboard.py
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.env/
+.venv/
+env/
+
+# IDE / Editor settings
+.vscode/
+.idea/
+
+# macOS / Windows system files
+.DS_Store
+Thumbs.db
+
+# Local data files
+leaderboard.json
+
+# Logs or temporary files
+*.log
+*.tmp
+
+# Build / distribution folders
+build/
+dist/
+*.egg-info/
+
+# Python profiling or test output
+.coverage
+.pytest_cache/

@@ -2,7 +2,8 @@ import tkinter as tk
 from game_logic import create_deck, is_set, exists_set, calculate_score
 from shapes import draw_card
 import time
-from tkinter import messagebox
+from tkinter import messagebox, simpledialog
+from leaderboard import load_leaderboard, save_leaderboard
 
 class SetCardGame:
     def __init__(self, root):
@@ -84,6 +85,12 @@ class SetCardGame:
         self.timer_label = tk.Label(self.info_frame, text="Time: 00:00.00",
                                     bg="#2c3e50", fg="white", font=("Arial", 16))
         self.timer_label.pack(side=tk.LEFT, padx=10)
+
+        self.leaderboard_button = tk.Button(self.info_frame, text="Leaderboard",
+                                    font=("Arial", 14), bg="#8e44ad", fg="white",
+                                    command=self.show_leaderboard)
+        self.leaderboard_button.pack(side=tk.RIGHT, padx=10)
+
 
         self.draw_table()
 
@@ -240,7 +247,20 @@ class SetCardGame:
 
         tk.messagebox.showinfo(title, f"Run finished!\n\nSets found: {sets_found}\nTime: {final_time_str}\nScore: {self.score}")
 
-        # update timer and socre label to final time
+        player_name = tk.simpledialog.askstring("Leaderboard", "Enter your name:")
+
+        if player_name:
+            leaderboard = load_leaderboard()
+            leaderboard.append({
+                "name": player_name,
+                "score": self.score,
+                "time": final_time_str
+            })
+            # Sort descending by score
+            leaderboard.sort(key=lambda x: x["score"], reverse=True)
+            save_leaderboard(leaderboard)
+
+        # update timer and score label to final time
         self.timer_label.config(text=f"Time: {final_time_str}")
         self.score_label.config(text=f"Score: {self.score}")
         print(self.score)
@@ -267,3 +287,15 @@ class SetCardGame:
 
         # schedule next update (50 ms)
         self.timer_update_job = self.root.after(50, self.update_timer)
+
+    def show_leaderboard(self):
+        leaderboard = load_leaderboard()
+        if not leaderboard:
+            tk.messagebox.showinfo("Leaderboard", "No entries yet!")
+            return
+
+        text = ""
+        for i, entry in enumerate(leaderboard[:10], start=1):  # top 10
+            text += f"{i}. {entry['name']} - Score: {entry['score']} - Time: {entry['time']}\n"
+
+        tk.messagebox.showinfo("Leaderboard - Top 10", text)
